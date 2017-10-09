@@ -41,27 +41,27 @@ class Tile(object):
                            'A': 0,
                            'B': 0}[char]
 
-            self.color = {'r': '#fdd692',
-                          'g': '#cbe079',
-                          'f': '#69c13f',
-                          'm': '#754f44',
-                          'w': '#5bc0eb',
+            self.color = {'r': '#D6AA5B',
+                          'g': '#A2B947',
+                          'f': '#35870D',
+                          'm': '#4C2013',
+                          'w': '#1C68D1',
                           '.': '#cbe079',
                           '#': '#754f44',
                           'A': 'red',
                           'B': 'blue'}[char]
 
-            if char == 'B' or char == 'A':
+            if char == 'B':
                 self.is_end = True
             else:
                 self.is_end = False
 
     def visit(self):
         """
-        Sets a tiles visit value to True. Start tile just keeps it's color.
+        Sets a tiles visit value to True. Start tile and end tile just keeps it's color.
         :return: None
         """
-        if self.char != 'A':
+        if self.char != 'A' and self.char != 'B':
             self.color = "grey"
         self.visited = True
         return
@@ -71,4 +71,4 @@ class Tile(object):
         toString method.
         :return: The tiles information as string.
         """
-        return 'Color=' + self.color + '\t' + 'Weight=' + str(self.weight) + '\t' + str(self.visited)
+        return 'Char=' + self.char + '\t' + 'Color=' + self.color + '\t' + 'Weight=' + str(self.weight) + '\t' + str(self.visited)

@@ -24,6 +24,7 @@ class Board(object):
         self.canvas = canvas
 
         self.tiles = {}
+        self.tiles_list = []
 
         self.populate_tiles()
         self.draw_board()
@@ -35,7 +36,9 @@ class Board(object):
         """
         for r in range(self.map.h):
             for c in range(self.map.w):
-                self.tiles[r, c] = Tile(self.map.board[r][c], r, c)
+                t = Tile(self.map.board[r][c], r, c)
+                self.tiles[r, c] = t
+                self.tiles_list.append(t)
         return
 
     def draw_board(self):
@@ -80,13 +83,13 @@ class Board(object):
         start_tile = self.tiles[start_tile]
         end_tile = self.tiles[end_tile]
 
-        while True:
-            for cord, tile in self.tiles.items():
-                tile.visit()
-                print(end_tile)
-                self.canvas.after(50, self.redraw(tile))
-                if end_tile.visited:
-                    return
+        i = self.tiles_list.index(start_tile)
+
+        for tile in self.tiles_list[i:]:
+            tile.visit()
+            self.canvas.after(50, self.redraw(tile))
+            if end_tile.visited:
+                return
 
 
 if __name__ == '__main__':
@@ -94,7 +97,7 @@ if __name__ == '__main__':
 
     root = tk.Tk()
 
-    m = Map(path + '/boards/board-2-4.txt')
+    m = Map(path + '/boards/board-1-1.txt')
 
     c = tk.Canvas(root, width=m.w*m.cellw, height=m.h*m.cellh, bd=0, highlightthickness=0)
 
