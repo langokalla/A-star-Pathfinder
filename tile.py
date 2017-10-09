@@ -25,6 +25,8 @@ class Tile(object):
         self.r = r
         self.c = c
 
+        self.neighbours = []
+
         self.x1 = self.c * 20
         self.x2 = self.x1 + 20
         self.y1 = self.r * 20
@@ -42,8 +44,8 @@ class Tile(object):
                            'B': 0}[char]
 
             self.color = {'r': '#D6AA5B',
-                          'g': '#A2B947',
-                          'f': '#35870D',
+                          'g': '#7fff7f',
+                          'f': '#007f00',
                           'm': '#4C2013',
                           'w': '#1C68D1',
                           '.': '#cbe079',
@@ -62,7 +64,8 @@ class Tile(object):
         :return: None
         """
         if self.char != 'A' and self.char != 'B':
-            self.color = "grey"
+            # self.color = "grey"
+            pass
         self.visited = True
         return
 
@@ -71,4 +74,5 @@ class Tile(object):
         toString method.
         :return: The tiles information as string.
         """
-        return 'Char=' + self.char + '\t' + 'Color=' + self.color + '\t' + 'Weight=' + str(self.weight) + '\t' + str(self.visited)
+        return 'Char=' + self.char + '\t' + 'Color=' + self.color + '\t' + 'Weight=' + str(self.weight) +\
+               '\t' + 'Visited=' + str(self.visited) + '\t' + str(self.r) + ' ' + str(self.c)

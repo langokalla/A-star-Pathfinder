@@ -1,5 +1,6 @@
 import tkinter as tk
 from tile import Tile
+from tools import bfs, Queue
 from map import Map
 import os
 
@@ -26,19 +27,90 @@ class Board(object):
         self.tiles = {}
         self.tiles_list = []
 
+        self.start = None
+        self.end = None
+
         self.populate_tiles()
+        self.map_neighbours()
         self.draw_board()
+
+    def map_neighbours(self):
+        for key, tile in self.tiles.items():
+            r, c = key
+
+            # Top left corner.
+            if r == 0 and c == 0:
+                self.add_neighbours(tile, self.tiles[r+1, c])       # Under
+                self.add_neighbours(tile, self.tiles[r, c+1])       # Right
+
+            # Top right corner.
+            elif r == 0 and c == self.map.w-1:
+                self.add_neighbours(tile, self.tiles[r, c-1])       # Left
+                self.add_neighbours(tile, self.tiles[r+1, c])       # Under
+
+            # Bottom left corner.
+            elif r == self.map.h-1 and c == 0:
+                self.add_neighbours(tile, self.tiles[r - 1, c])     # Over
+                self.add_neighbours(tile, self.tiles[r, c + 1])     # Right
+
+            # Bottom right corner.
+            elif r == self.map.h-1 and c == self.map.w-1:
+                self.add_neighbours(tile, self.tiles[r - 1, c])     # Over
+                self.add_neighbours(tile, self.tiles[r, c - 1])     # Left
+
+            # Top border.
+            elif r == 0:
+                self.add_neighbours(tile, self.tiles[r + 1, c])     # Under
+                self.add_neighbours(tile, self.tiles[r, c + 1])     # Right
+
+            # Right border.
+            elif c == self.map.w-1:
+                self.add_neighbours(tile, self.tiles[r + 1, c])     # Under
+                self.add_neighbours(tile, self.tiles[r - 1, c])     # Over
+                self.add_neighbours(tile, self.tiles[r, c - 1])     # Left
+
+            # Bottom border.
+            elif r == self.map.h-1:
+                self.add_neighbours(tile, self.tiles[r - 1, c])     # Over
+                self.add_neighbours(tile, self.tiles[r, c - 1])     # Left
+                self.add_neighbours(tile, self.tiles[r, c + 1])     # Right
+
+            # Left border.
+            elif c == 0:
+                self.add_neighbours(tile, self.tiles[r - 1, c])     # Over
+                self.add_neighbours(tile, self.tiles[r + 1, c])     # Under
+                self.add_neighbours(tile, self.tiles[r, c + 1])     # Right
+
+            # Elsewhere in the map.
+            else:
+                self.add_neighbours(tile, self.tiles[r - 1, c])     # Over
+                self.add_neighbours(tile, self.tiles[r + 1, c])     # Under
+                self.add_neighbours(tile, self.tiles[r, c + 1])     # Right
+                self.add_neighbours(tile, self.tiles[r, c - 1])     # Left
+
+    def add_neighbours(self, tile1, tile2):
+        if tile2.char != '#':
+            if tile2 not in tile1.neighbours:
+                tile1.neighbours.append(tile2)
+        if tile1.char != '#':
+            if tile1 not in tile2.neighbours:
+                tile2.neighbours.append(tile1)
 
     def populate_tiles(self):
         """
         Runs throug all possible cell coordinates of the board and makes a Tile and puts it in the tile dictionary.
         :return: None
         """
-        for r in range(self.map.h):
+        for r in range(self.map.h):                         # Iterates through the whole map.
             for c in range(self.map.w):
-                t = Tile(self.map.board[r][c], r, c)
-                self.tiles[r, c] = t
-                self.tiles_list.append(t)
+                t = Tile(self.map.board[r][c], r, c)        # Makes a tile.
+                if t.char == 'A':                           # If the tile is a start tile or
+                    self.start = t                          # a end tile, set it accordingly.
+                elif t.char == 'B':
+                    self.end = t
+
+                self.tiles[r, c] = t                        # Put the tile in a dictionary with
+                self.tiles_list.append(t)                   # coord as keys. Also append in list.
         return
 
     def draw_board(self):
@@ -47,10 +119,10 @@ class Board(object):
         tiles to the right location.
         :return: None
         """
-        for row in range(self.map.h):
+        for row in range(self.map.h):                                   # Iterate through the whole map.
             for col in range(self.map.w):
-                self.draw_tile(self.tiles[row, col])
-        self.canvas.pack()
+                self.draw_tile(self.tiles[row, col])          # Draw the tile.
+        self.canvas.pack()                                              # Pack the canvas.
         # self.canvas.update()
         return
 
@@ -63,46 +135,73 @@ class Board(object):
         self.canvas.create_rectangle(tile.x1, tile.y1, tile.x2, tile.y2, fill=tile.color, outline="white")
         return
 
-    def redraw(self, tile):
+    def redraw_oval(self, tile, color):
         """
         The update function. Re-draws a tile. Only called if a tile may be visited, and changed color.
         :param tile: Tile object.
         :return: None
-        """
-        self.canvas.create_rectangle(tile.x1, tile.y1, tile.x2, tile.y2, fill=tile.color, outline="white")
-        self.canvas.update()
+        """                                                 # Px is pixel offset. Calculates a new
+        px = 7                                              # centered oval to draw. Not draw on start/end.
+        if tile != self.start and tile != self.end:
+            self.canvas.create_oval(tile.x1 + px, tile.y1 + px, tile.x2 - px, tile.y2 - px, fill=color, outline=color)
+            self.canvas.update()
         return
 
-    def run_algorithm(self, start_tile, end_tile):
+
+    def run_algorithm(self, animate=False):
         """
         The algorithm we are gonna run. BFS, Dijkstra, DFS etc.
         :param start_tile: Start node. Tile object.
         :param end_tile: Goal node. Tile object.
         :return: None
         """
-        start_tile = self.tiles[start_tile]
-        end_tile = self.tiles[end_tile]
-
-        i = self.tiles_list.index(start_tile)
+        """
+        i = self.tiles_list.index(self.start)
 
         for tile in self.tiles_list[i:]:
             tile.visit()
             self.canvas.after(50, self.redraw(tile))
-            if end_tile.visited:
+            if self.end.visited:
                 return
+        """
+        cf = bfs(self.start, self.end)
+
+        for tile, came_from in cf.items():
+            if came_from is None:
+                pass
+            else:
+                if tile.char == 'B':
+                    break
+                self.canvas.after(50, self.redraw_oval(tile, "#999",))
+
+        if animate:
+            self.draw_board()
+
+        current = cf[self.end]
+        while current != self.start:
+            self.canvas.after(50, self.redraw_oval(current, "black"))
+            current = cf[current]
 
 
 if __name__ == '__main__':
+
+    level = '2-4'
     path = os.getcwd()
 
+    # Make a root tkinter object and title it.
     root = tk.Tk()
+    root.title('ALGIRITHMIS N SHITE: ' + level)
 
-    m = Map(path + '/boards/board-1-1.txt')
+    # Make a map object to read the map file from level path.
+    m = Map(path + '/boards/board-' + level + '.txt')
 
+    # Make a canvas with correct width and height.
+    # Make the board on the canvas with the current map.
     c = tk.Canvas(root, width=m.w*m.cellw, height=m.h*m.cellh, bd=0, highlightthickness=0)
-
     b = Board(c, m)
 
-    b.run_algorithm(m.start, m.end)
+    # Run whichever algoritm is gonna run.
+    b.run_algorithm()
 
+    # tkinter mainloop
     root.mainloop()

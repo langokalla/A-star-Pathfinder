@@ -18,12 +18,6 @@ class Map(object):
         self.cellh = 20
         self.cellw = 20
 
-        self.start = self.find_unique_tile('A')
-        self.end = self.find_unique_tile('B')
-
-    def find_unique_tile(self, char):
-        return [(i, row.index(char)) for i, row in enumerate(self.board) if char in row][0]
-
     @staticmethod
     def get_file(filename):
         """
