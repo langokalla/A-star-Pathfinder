@@ -1,6 +1,6 @@
 from queues import PriorityQueue
 
-# TODO: fullfør a*, fungerer ikke.
+# TODO: fullfør a*, fungerer ikke. Blir ikke successful.
 
 
 def heuristic(tile1, tile2):

@@ -1,12 +1,7 @@
-import tkinter as tk
-import os
-
-from tile import Tile
-from map import Map
-
 from bfs import bfs
 from dijkstra import dijkstra
 from a_star import *
+from tile import Tile
 
 
 class Board(object):
@@ -169,7 +164,7 @@ class Board(object):
                 path = reconstruct_path(cf, self.start, self.end)
                 print(path)
 
-        if not suc:
+        if suc:
             for tile, came_from in cf.items():
                 if came_from is None:
                     pass
@@ -177,7 +172,6 @@ class Board(object):
                     if tile.char == 'B':
                         break
                     self.canvas.after(50, self.redraw_oval(tile, "#999"))
-                    print("hey")
             if animate:
                 self.draw_board()
 
@@ -185,27 +179,3 @@ class Board(object):
             while current != self.start:
                 self.canvas.after(50, self.redraw_oval(current, "black"))
                 current = cf[current]
-
-
-if __name__ == '__main__':
-
-    level = '1-2'
-    path = os.getcwd()
-
-    # Make a root tkinter object and title it.
-    root = tk.Tk()
-    root.title('ALGIRITHMIS N SHITE: ' + level)
-
-    # Make a map object to read the map file from level path.
-    m = Map(path + '/boards/board-' + level + '.txt')
-
-    # Make a canvas with correct width and height.
-    # Make the board on the canvas with the current map.
-    c = tk.Canvas(root, width=m.w*m.cell_size, height=m.h * m.cell_size, bd=0, highlightthickness=0)
-    b = Board(c, m)
-
-    # Run whichever algoritm is gonna run.
-    b.run_algorithm("a")
-
-    # tkinter mainloop
-    root.mainloop()
