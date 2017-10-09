@@ -3,10 +3,24 @@ import math
 
 class Tile(object):
 
+    """
+    The Tile object. Can be interpreted as a node in the structure.
+    Includes positional values and weighted values as colors.
+    Can be visited and not visited (bool).
+    Can be the end if the node is the goal tile (bool).
+    """
+
     def __init__(self, char, r, c):
+        """
+        Initializes the tile node.
+        :param char: Fetched from the .txt-map. Determines the weighted value.
+        :param r: Row location.
+        :param c: Column location
+
+        Sets visited and is_end to False, except the end node B.
+        """
 
         self.visited = False
-        self.is_end = False
         self.char = char
         self.r = r
         self.c = c
@@ -37,13 +51,24 @@ class Tile(object):
                           'A': 'red',
                           'B': 'blue'}[char]
 
-            if char == 'B':
+            if char == 'B' or char == 'A':
                 self.is_end = True
+            else:
+                self.is_end = False
 
     def visit(self):
+        """
+        Sets a tiles visit value to True. Start tile just keeps it's color.
+        :return: None
+        """
         if self.char != 'A':
             self.color = "grey"
         self.visited = True
+        return
 
     def __str__(self):
+        """
+        toString method.
+        :return: The tiles information as string.
+        """
         return 'Color=' + self.color + '\t' + 'Weight=' + str(self.weight) + '\t' + str(self.visited)
