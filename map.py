@@ -15,8 +15,7 @@ class Map(object):
         self.board = self.boardify_file(self.get_file(filename))
         self.h = len(self.board)
         self.w = len(self.board[0])
-        self.cellh = 20
-        self.cellw = 20
+        self.cell_size = 30
 
     @staticmethod
     def get_file(filename):

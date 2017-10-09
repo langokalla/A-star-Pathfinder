@@ -10,7 +10,7 @@ class Tile(object):
     Can be the end if the node is the goal tile (bool).
     """
 
-    def __init__(self, char, r, c):
+    def __init__(self, char, r, c, size):
         """
         Initializes the tile node.
         :param char: Fetched from the .txt-map. Determines the weighted value.
@@ -27,10 +27,10 @@ class Tile(object):
 
         self.neighbours = []
 
-        self.x1 = self.c * 20
-        self.x2 = self.x1 + 20
-        self.y1 = self.r * 20
-        self.y2 = self.y1 + 20
+        self.x1 = self.c * size
+        self.x2 = self.x1 + size
+        self.y1 = self.r * size
+        self.y2 = self.y1 + size
 
         if char in ['r', 'g', 'f', 'm', 'w', '.', '#', 'A', 'B']:
             self.weight = {'r': 1,
@@ -68,6 +68,9 @@ class Tile(object):
             pass
         self.visited = True
         return
+
+    def __lt__(self, tile2):
+        return self.weight < tile2.weight
 
     def __str__(self):
         """

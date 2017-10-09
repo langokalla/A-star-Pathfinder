@@ -1,8 +1,12 @@
 import tkinter as tk
-from tile import Tile
-from tools import bfs, Queue
-from map import Map
 import os
+
+from tile import Tile
+from map import Map
+
+from bfs import bfs
+from dijkstra import dijkstra
+from a_star import *
 
 
 class Board(object):
@@ -101,9 +105,10 @@ class Board(object):
         Runs throug all possible cell coordinates of the board and makes a Tile and puts it in the tile dictionary.
         :return: None
         """
+        size = self.map.cell_size
         for r in range(self.map.h):                         # Iterates through the whole map.
             for c in range(self.map.w):
-                t = Tile(self.map.board[r][c], r, c)        # Makes a tile.
+                t = Tile(self.map.board[r][c], r, c, size)  # Makes a tile.
                 if t.char == 'A':                           # If the tile is a start tile or
                     self.start = t                          # a end tile, set it accordingly.
                 elif t.char == 'B':
@@ -121,7 +126,7 @@ class Board(object):
         """
         for row in range(self.map.h):                                   # Iterate through the whole map.
             for col in range(self.map.w):
-                self.draw_tile(self.tiles[row, col])          # Draw the tile.
+                self.draw_tile(self.tiles[row, col])                    # Draw the tile.
         self.canvas.pack()                                              # Pack the canvas.
         # self.canvas.update()
         return
@@ -141,51 +146,50 @@ class Board(object):
         :param tile: Tile object.
         :return: None
         """                                                 # Px is pixel offset. Calculates a new
-        px = 7                                              # centered oval to draw. Not draw on start/end.
+        px = 0.35*self.map.cell_size                        # centered oval to draw. Not draw on start/end.
         if tile != self.start and tile != self.end:
             self.canvas.create_oval(tile.x1 + px, tile.y1 + px, tile.x2 - px, tile.y2 - px, fill=color, outline=color)
             self.canvas.update()
         return
 
-
-    def run_algorithm(self, animate=False):
+    def run_algorithm(self, algo, animate=False):
         """
         The algorithm we are gonna run. BFS, Dijkstra, DFS etc.
         :param start_tile: Start node. Tile object.
         :param end_tile: Goal node. Tile object.
         :return: None
         """
-        """
-        i = self.tiles_list.index(self.start)
+        if algo == "bfs":
+            (cf, suc) = bfs(self.start, self.end)
+        elif algo == "d":
+            (cf, csf, suc) = dijkstra(self.start, self.end)
+        elif algo == "a":
+            (cf, csf, suc) = a_star(self.start, self.end)
+            if suc:
+                path = reconstruct_path(cf, self.start, self.end)
+                print(path)
 
-        for tile in self.tiles_list[i:]:
-            tile.visit()
-            self.canvas.after(50, self.redraw(tile))
-            if self.end.visited:
-                return
-        """
-        cf = bfs(self.start, self.end)
+        if not suc:
+            for tile, came_from in cf.items():
+                if came_from is None:
+                    pass
+                else:
+                    if tile.char == 'B':
+                        break
+                    self.canvas.after(50, self.redraw_oval(tile, "#999"))
+                    print("hey")
+            if animate:
+                self.draw_board()
 
-        for tile, came_from in cf.items():
-            if came_from is None:
-                pass
-            else:
-                if tile.char == 'B':
-                    break
-                self.canvas.after(50, self.redraw_oval(tile, "#999",))
-
-        if animate:
-            self.draw_board()
-
-        current = cf[self.end]
-        while current != self.start:
-            self.canvas.after(50, self.redraw_oval(current, "black"))
-            current = cf[current]
+            current = cf[self.end]
+            while current != self.start:
+                self.canvas.after(50, self.redraw_oval(current, "black"))
+                current = cf[current]
 
 
 if __name__ == '__main__':
 
-    level = '2-4'
+    level = '1-2'
     path = os.getcwd()
 
     # Make a root tkinter object and title it.
@@ -197,11 +201,11 @@ if __name__ == '__main__':
 
     # Make a canvas with correct width and height.
     # Make the board on the canvas with the current map.
-    c = tk.Canvas(root, width=m.w*m.cellw, height=m.h*m.cellh, bd=0, highlightthickness=0)
+    c = tk.Canvas(root, width=m.w*m.cell_size, height=m.h * m.cell_size, bd=0, highlightthickness=0)
     b = Board(c, m)
 
     # Run whichever algoritm is gonna run.
-    b.run_algorithm()
+    b.run_algorithm("a")
 
     # tkinter mainloop
     root.mainloop()
