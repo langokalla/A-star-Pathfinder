@@ -10,8 +10,9 @@ class App:
     def __init__(self):
         pass
 
-    def run(self):
-        level = '1-2'
+    @staticmethod
+    def run():
+        level = '2-4'
         path = os.getcwd()
 
         # Make a root tkinter object and title it.
@@ -30,6 +31,7 @@ class App:
 
         # tkinter mainloop
         root.mainloop()
+
 
 if __name__ == '__main__':
     app = App()

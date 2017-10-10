@@ -162,9 +162,9 @@ class Board(object):
             (cf, csf, suc) = a_star(self.start, self.end)
             if suc:
                 path = reconstruct_path(cf, self.start, self.end)
-                print(path)
 
         if suc:
+            print("Total cost: ", csf[self.end])
             for tile, came_from in cf.items():
                 if came_from is None:
                     pass
