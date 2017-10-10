@@ -4,6 +4,11 @@ import heapq
 
 class Queue:
 
+    """
+    Last in first out queue. Implemented as a collections.deque (deck / stack).
+    Used for BFS.
+    """
+
     def __init__(self):
         self.elements = collections.deque()
 
@@ -21,6 +26,11 @@ class Queue:
 
 
 class PriorityQueue:
+
+    """
+    Priority queue. Implemented as a heapq from collections.
+    Used in Dijkstra and A*.
+    """
 
     def __init__(self):
         self.elements = []
